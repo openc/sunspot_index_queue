@@ -30,6 +30,26 @@ describe Sunspot::IndexQueue::Batch do
     entry_2.processed?.should == true
   end
   
+  context 'and NOCOMMIT environment variable set' do
+    before do
+      ENV['NOCOMMIT'] = 'true'
+    end
+    after do
+      ENV['NOCOMMIT'] = nil
+    end
+    it "should submit all entries in a batch to Solr but not commit them" do
+      entry_1.stub!(:record).and_return(record_1)
+      session.should_receive(:batch).and_yield
+      session.should_receive(:index).with(record_1)
+      session.should_receive(:remove_by_id).with(entry_2.record_class_name, entry_2.record_id)
+      session.should_not_receive(:commit)
+      Sunspot::IndexQueue::Entry.implementation.should_receive(:delete_entries).with([entry_1, entry_2])
+      subject.submit!
+      entry_1.processed?.should == true
+      entry_2.processed?.should == true
+    end
+  end
+  
   it "should submit all entries in a batch to Solr using include options if they are supported on the model and data adapters" do
     record = Sunspot::IndexQueue::Test::Searchable::IncludeClass.new(1)
     entry = Sunspot::IndexQueue::Entry::MockImpl.new(:record => record, :delete => false)

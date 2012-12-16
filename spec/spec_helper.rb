@@ -3,6 +3,7 @@ require 'rubygems'
 require 'uri'
 require 'fileutils'
 require 'net/http'
+require 'forwardable'
 
 if ENV["ACTIVE_RECORD_VERSION"]
   gem 'activerecord', ENV["ACTIVE_RECORD_VERSION"]
