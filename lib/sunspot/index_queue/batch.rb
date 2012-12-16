@@ -64,7 +64,7 @@ module Sunspot
       
       # Send the Solr commit command and delete the entries if it succeeds.
       def commit!
-        session.commit
+        session.commit unless ENV['NOCOMMIT']
         Entry.delete_entries(@delete_entries) unless @delete_entries.empty?
       rescue Exception => e
         clear_processed(entries)
